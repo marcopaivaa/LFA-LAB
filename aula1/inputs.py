@@ -1,4 +1,4 @@
-import functions as func
+from functions import *
 
 def input_sequencia(regras):
     print_regras(regras)
@@ -19,7 +19,7 @@ def input_sequencia(regras):
             return sequencia
 
 def print_regras(regras):
-    func.cls()
+    cls()
     print("\n")
     for regra in regras:
         print("Regra #" + str(regras.index(regra)) + ": " + str(regra))

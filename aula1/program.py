@@ -1,13 +1,13 @@
-import inputs as inp
+from inputs import *
 
 
 def main():
     
-    variaveis = inp.input_variaveis()
-    alfabeto = inp.input_alfabeto()
-    variavel_inicial = inp.input_varivel_inicial(variaveis)
-    regras = inp.input_regras(variaveis, alfabeto)
-    sequencia = inp.input_sequencia(regras)
+    variaveis = input_variaveis()
+    alfabeto = input_alfabeto()
+    variavel_inicial = input_varivel_inicial(variaveis)
+    regras = input_regras(variaveis, alfabeto)
+    sequencia = input_sequencia(regras)
     
     palavra = variavel_inicial
     for sq in sequencia:
