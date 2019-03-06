@@ -1,6 +1,6 @@
 from functions import *
 
-def input_sequencia(regras):
+def input_sequencia(regras, variavel_inicial):
     print_regras(regras)
     while(True):
         loop = False
@@ -9,6 +9,9 @@ def input_sequencia(regras):
             print("Escolha pelo menos uma regra!")
             continue
         sequencia = sequencia.split()
+        if(list(regras[int(sequencia[0])].keys())[0] != variavel_inicial):
+            print("A sequencia deve iniciar com a variavel inicial!")
+            continue
         for var in sequencia:
             var = int(var)
             if(var < 0 or var > len(regras) - 1):
@@ -34,7 +37,7 @@ def input_regras(variaveis, alfabeto):
             return regras
         regra = regra.split(" ")
         if(len(regra) != 2):
-                print("Uma regra deve conter apenas dois paramtros: predecessor e sucessor!")
+                print("Uma regra deve conter apenas dois parametros: predecessor e sucessor!")
                 loop = True
                 continue
         for var in regra:
@@ -50,15 +53,15 @@ def input_regras(variaveis, alfabeto):
                 regra[0]: regra[1]
             })
 
-def input_varivel_inicial(variaveis):
+def input_variavel_inicial(variaveis):
     while(True):
         loop = False
-        varivel_inicial = input("Digite a variavel inicial: ")
-        if(not varivel_inicial in variaveis):
+        variavel_inicial = input("Digite a variavel inicial: ")
+        if(not variavel_inicial in variaveis):
             print("A variavel inicial devem estar inclusa no conjunto de variaveis!")
             loop = True
         if(not loop):
-            return varivel_inicial
+            return variavel_inicial
 
 def input_alfabeto():
     while(True):

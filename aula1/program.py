@@ -5,9 +5,9 @@ def main():
     
     variaveis = input_variaveis()
     alfabeto = input_alfabeto()
-    variavel_inicial = input_varivel_inicial(variaveis)
+    variavel_inicial = input_variavel_inicial(variaveis)
     regras = input_regras(variaveis, alfabeto)
-    sequencia = input_sequencia(regras)
+    sequencia = input_sequencia(regras, variavel_inicial)
     
     palavra = variavel_inicial
     for sq in sequencia:
