@@ -5,11 +5,11 @@ class Node:
         self.name = ""
         self.edges = []   
 
-    def removeEdge(edge):
+    def removeEdge(self, edge):
         edges.remove(edge)
 
-    def setName(name):
+    def setName(self, name):
         self.name = name
     
-    def addEdge(to):
+    def addEdge(self, to):
         self.edges.append(to)
