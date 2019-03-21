@@ -1,9 +1,9 @@
-from edge import *
+from node import *
 
-class Node:
-    def __init__(self):
-        self.name = ""
-        self.edges = []   
+class Edge:
+    def __init__(self, fromNode, toNode):
+        self.fromNode = fromNode
+        self.toNode = toNode
 
     def removeEdge(self, edge):
         edges.remove(edge)
