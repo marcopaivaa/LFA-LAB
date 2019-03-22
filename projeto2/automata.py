@@ -3,6 +3,7 @@ from structures.myStack import MyStack
 from structures.myNode import MyNode
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 STATE = -1
 V_EMPTY = '#'
@@ -145,9 +146,9 @@ class Automata:
 
         for n in self.nodes:
             if(n.init):
-                color_map.append('b')
+                color_map.append('y')
             elif(n.end):
-                color_map.append('r')
+                color_map.append('m')
             else:
                 color_map.append('c')
             g.add_node(n.value)
@@ -160,4 +161,7 @@ class Automata:
         pos = nx.shell_layout(g)
         nx.draw(g, pos, with_labels=True, arrows=True, arrowsize=7, node_color=color_map, node_size=400, font_size=10)
         nx.draw_networkx_edge_labels(g,pos,edge_labels=edge_labels)
+        blue = mpatches.Patch(color='y', label='Initial State')
+        red = mpatches.Patch(color='m', label='Final State')
+        plt.legend(handles=[blue,red])
         plt.show()
