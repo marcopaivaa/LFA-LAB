@@ -2,6 +2,9 @@ from structures.myQueue import MyQueue
 from structures.myStack import MyStack
 from structures.myNode import MyNode
 
+STATE = -1
+V_EMPTY = '#'
+
 def createAutomata(regex):
     prefix = toPrefix(regex)
     queue = enqueueStringChar(prefix)
@@ -11,36 +14,6 @@ def createAutomata(regex):
 
 def toPrefix(str):
     return "A*B|AB"
-    priority = {
-        '(': 1,
-        ')': 1,
-        '+': 1,
-        '*': 1,
-        '|': 2,
-    }
-    stack = MyStack()
-    posfix = ""
-
-    for x in str:
-        if(x == '('):
-            stack.push(x)
-        elif(x == ')'):
-            posfix+=stack.pop()
-            while priority[x] !=  priority[stack.peek()]:
-                posfix+=stack.pop()
-            stack.pop()
-        elif(x == '|'):
-            while stack.peek() != None and priority[x] <=  priority[stack.peek()]:
-                posfix+=stack.pop()
-            stack.push(x)
-        else:
-            posfix += x
-
-    while stack.empty() != True:
-        posfix+=stack.pop()
-
-    return posfix
-
 
 def enqueueStringChar(str):
     queue = MyQueue()
@@ -65,71 +38,76 @@ def automata(queue):
         return n
     else:
         next = automata(queue)
-        n.last.addEdge(next, "#")
+        n.last.addEdge(next, V_EMPTY)
     
     return n
 
 
 def createNode(n1):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    value = MyNode("value")
+    init = newNode()
+    empty = newNode()
+    value = newNode()
+    end = newNode()
 
-    init.addEdge(empty,'#')
+    init.addEdge(empty,V_EMPTY)
     empty.addEdge(value, n1)
-    value.addEdge(end, '#')
+    value.addEdge(end, V_EMPTY)
 
     init.last = end
 
     return init
 
 def createPlus(n1):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    value = MyNode("value")
+    init = newNode()
+    empty = newNode()
+    value = newNode()
+    end = newNode()
 
-    init.addEdge(empty,'#')
+    init.addEdge(empty,V_EMPTY)
     empty.addEdge(value, n1)
-    value.addEdge(empty, '#')
-    value.addEdge(end, '#')
+    value.addEdge(empty, V_EMPTY)
+    value.addEdge(end, V_EMPTY)
 
     init.last = end
 
     return init
 
 def createCline(n1):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    value = MyNode("value")
+    init = newNode()
+    empty = newNode()
+    value = newNode()
+    end = newNode()
 
-    init.addEdge(empty,'#')
-    empty.addEdge(end, '#')
+    init.addEdge(empty,V_EMPTY)
+    empty.addEdge(end, V_EMPTY)
     empty.addEdge(value, n1)
-    value.addEdge(empty, '#')
-    value.addEdge(end, '#')
+    value.addEdge(empty, V_EMPTY)
+    value.addEdge(end, V_EMPTY)
     
     init.last = end
 
     return init
 
 def createOr(n1, n2):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    empty2 = MyNode("empty2")
-    value = MyNode("value")
-    value2 = MyNode("value2")
+    init = newNode()
+    empty = newNode()
+    value = newNode()
+    empty2 = newNode()
+    value2 = newNode()
+    end = newNode()
 
-    init.addEdge(empty,'#')
-    init.addEdge(empty2,'#')
+    init.addEdge(empty,V_EMPTY)
+    init.addEdge(empty2,V_EMPTY)
     empty.addEdge(value,n1)
     empty2.addEdge(value2,n2)
-    value.addEdge(end,'#')
-    value2.addEdge(end,'#')
+    value.addEdge(end,V_EMPTY)
+    value2.addEdge(end,V_EMPTY)
 
     init.last = end
 
     return init
+
+def newNode():
+    global STATE
+    STATE += 1
+    return MyNode('Q' + str(STATE))
