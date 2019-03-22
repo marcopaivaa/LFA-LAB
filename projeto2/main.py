@@ -1,9 +1,11 @@
-from automata import *
+from automata import Automata
 
 def main():
-    regex = input("\nDigite o regex: ")
-    node = createAutomata(regex)
-    print(node)
+    regex = input("\nInput regex expression: ")
+    automata = Automata()
+    automata.createAutomata(regex)
+    automata.print()
+    automata.plot()
 
 
 if __name__ == '__main__':
