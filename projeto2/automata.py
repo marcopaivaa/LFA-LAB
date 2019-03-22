@@ -1,140 +1,168 @@
 from structures.myQueue import MyQueue
 from structures.myStack import MyStack
 from structures.myNode import MyNode
+import networkx as nx
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+STATE = -1
+V_EMPTY = '#'
 
 
-def createAutomata(regex):
-    prefix = toPrefix(regex)
-    queue = enqueueStringChar(prefix)
-    node = automata(queue)
-    node.init = True
-    return node
+class Automata:
 
+    def __init__(self):
+        self.nodes = []
+        self.init = None
+        self.ends = None
 
-def toPrefix(str):
-    return "A*B|AB"
-    priority = {
-        '(': 1,
-        ')': 1,
-        '+': 1,
-        '*': 1,
-        '|': 2,
-    }
-    stack = MyStack()
-    posfix = ""
+    def createAutomata(self, regex):
+        self.nodes = []
+        prefix = self.toPrefix(regex)
+        queue = self.enqueueStringChar(prefix)
+        node = self.automata(queue)
+        node.init = True
+        self.init = node
+        return node
 
-    for x in str:
-        if(x == '('):
-            stack.push(x)
-        elif(x == ')'):
-            posfix += stack.pop()
-            while priority[x] != priority[stack.peek()]:
-                posfix += stack.pop()
-            stack.pop()
-        elif(x == '|'):
-            while stack.peek() is not None and priority[x] <= priority[stack.peek()]:
-                posfix += stack.pop()
-            stack.push(x)
+    def toPrefix(self, str):
+        return "A*B|AB"
+
+    def enqueueStringChar(self, str):
+        queue = MyQueue()
+        for char in list(str):
+            queue.enqueue(char)
+        return queue
+
+    def automata(self, queue):
+        value = queue.dequeue()
+        if(value == "|"):
+            n = self.createOr(queue.dequeue(), queue.dequeue())
+        elif(value == "*"):
+            n = self.createCline(queue.dequeue())
+        elif(value == "+"):
+            n = self.createPlus(queue.dequeue())
         else:
-            posfix += x
+            n = self.createNode(value)
 
-    while stack.empty() is not True:
-        posfix += stack.pop()
+        if(queue.size() == 0):
+            n.last.end = True
+            self.end = n.last
+            return n
+        else:
+            next = self.automata(queue)
+            n.last.addEdge(next, V_EMPTY)
 
-    return posfix
-
-
-def enqueueStringChar(str):
-    queue = MyQueue()
-    for char in list(str):
-        queue.enqueue(char)
-    return queue
-
-
-def automata(queue):
-    value = queue.dequeue()
-    if(value == "|"):
-        n = createOr(queue.dequeue(), queue.dequeue())
-    elif(value == "*"):
-        n = createCline(queue.dequeue())
-    elif(value == "+"):
-        n = createPlus(queue.dequeue())
-    else:
-        n = createNode(value)
-
-    if(queue.size() == 0):
-        n.last.end = True
         return n
-    else:
-        next = automata(queue)
-        n.last.addEdge(next, "#")
 
-    return n
+    def createNode(self, n1):
+        init = self.newNode()
+        empty = self.newNode()
+        value = self.newNode()
+        end = self.newNode()
 
+        init.addEdge(empty, V_EMPTY)
+        empty.addEdge(value, n1)
+        value.addEdge(end, V_EMPTY)
 
-def createNode(n1):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    value = MyNode("value")
+        init.last = end
 
-    init.addEdge(empty, '#')
-    empty.addEdge(value, n1)
-    value.addEdge(end, '#')
+        return init
 
-    init.last = end
+    def createPlus(self, n1):
+        init = self.newNode()
+        empty = self.newNode()
+        value = self.newNode()
+        empty2 = self.newNode()
+        end = self.newNode()
 
-    return init
+        init.addEdge(empty, V_EMPTY)
+        empty.addEdge(value, n1)
+        value.addEdge(empty2, V_EMPTY)
+        empty2.addEdge(empty, V_EMPTY)
+        value.addEdge(end, V_EMPTY)
 
+        init.last = end
 
-def createPlus(n1):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    value = MyNode("value")
+        return init
 
-    init.addEdge(empty, '#')
-    empty.addEdge(value, n1)
-    value.addEdge(empty, '#')
-    value.addEdge(end, '#')
+    def createCline(self, n1):
+        init = self.newNode()
+        empty = self.newNode()
+        value = self.newNode()
+        empty2 = self.newNode()
+        end = self.newNode()
 
-    init.last = end
+        init.addEdge(empty, V_EMPTY)
+        empty.addEdge(end, V_EMPTY)
+        empty.addEdge(value, n1)
+        value.addEdge(empty2, V_EMPTY)
+        empty2.addEdge(empty, V_EMPTY)
+        value.addEdge(end, V_EMPTY)
 
-    return init
+        init.last = end
 
+        return init
 
-def createCline(n1):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    value = MyNode("value")
+    def createOr(self, n1, n2):
+        init = self.newNode()
+        empty = self.newNode()
+        value = self.newNode()
+        empty2 = self.newNode()
+        value2 = self.newNode()
+        end = self.newNode()
 
-    init.addEdge(empty, '#')
-    empty.addEdge(end, '#')
-    empty.addEdge(value, n1)
-    value.addEdge(empty, '#')
-    value.addEdge(end, '#')
+        init.addEdge(empty, V_EMPTY)
+        init.addEdge(empty2, V_EMPTY)
+        empty.addEdge(value, n1)
+        empty2.addEdge(value2, n2)
+        value.addEdge(end, V_EMPTY)
+        value2.addEdge(end, V_EMPTY)
 
-    init.last = end
+        init.last = end
 
-    return init
+        return init
 
+    def newNode(self):
+        global STATE
+        STATE += 1
+        n = MyNode('Q' + str(STATE))
+        self.nodes.append(n)
+        return n
 
-def createOr(n1, n2):
-    init = MyNode("init")
-    end = MyNode("end")
-    empty = MyNode("empty")
-    empty2 = MyNode("empty2")
-    value = MyNode("value")
-    value2 = MyNode("value2")
+    def print(self):
+        print("\nInitial state: " + str(self.init.value))
+        print("Final state: " + str(self.end.value) + "\n")
+        for n in self.nodes:
+            for e in n.edges:
+                print(str(n.value) + " => " +
+                      str(e.value) + " -> " + str(e.to.value))
+        print("\n")
 
-    init.addEdge(empty, '#')
-    init.addEdge(empty2, '#')
-    empty.addEdge(value, n1)
-    empty2.addEdge(value2, n2)
-    value.addEdge(end, '#')
-    value2.addEdge(end, '#')
+    def plot(self):
+        g = nx.DiGraph()
+        edge_labels = dict()
+        color_map = []
 
-    init.last = end
+        for n in self.nodes:
+            if(n.init):
+                color_map.append('y')
+            elif(n.end):
+                color_map.append('m')
+            else:
+                color_map.append('c')
+            g.add_node(n.value)
 
-    return init
+        for n in self.nodes:
+            for e in n.edges:
+                g.add_edge(n.value, e.to.value)
+                edge_labels[(n.value, e.to.value)] = e.value
+
+        pos = nx.shell_layout(g)
+        nx.draw(g, pos, with_labels=True, arrows=True, arrowsize=7,
+                node_color=color_map, node_size=400, font_size=10)
+        nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
+        blue = mpatches.Patch(color='y', label='Initial State')
+        red = mpatches.Patch(color='m', label='Final State')
+        plt.legend(handles=[blue, red])
+        plt.show()
