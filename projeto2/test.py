@@ -4,21 +4,25 @@ from node import *
 from vertex import *
 import unittest
 
+
 class TestStringMethods(unittest.TestCase):
-    
+
     def test_upper(self):
         automato = createAutomato(regex)
         self.assertTrue(True)
 
+
 def createAutomato(regex):
     preFix = toPreFix(regex)
-    queue = enqueuePreFix(preFix) 
+    queue = enqueuePreFix(preFix)
     automato = automato(queue)
     automato.init = createInit()
     return automato
 
+
 def toPreFix(regex):
     return "A*B|AB"
+
 
 def enqueuePreFix(preFix):
     queue = Queue()
@@ -26,10 +30,11 @@ def enqueuePreFix(preFix):
         queue.enqueue(char)
     return queue
 
+
 def automato(queue):
     value = queue.dequeue()
     if(value == "|"):
-        n = createOr(queue.dequeue(),queue.dequeue())
+        n = createOr(queue.dequeue(), queue.dequeue())
     elif(value == "*"):
         n = createCline(queue.dequeue())
     elif(value == "+"):
@@ -43,7 +48,5 @@ def automato(queue):
     else:
         next = automato(queue)
         n.end = next
-    
-    return n
 
-    
+    return n

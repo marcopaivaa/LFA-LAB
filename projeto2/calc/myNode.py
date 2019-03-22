@@ -1,15 +1,15 @@
-from edge import *
-
-class Node:
+class MyNode:
     def __init__(self):
+        self.visited = False
+        self.parent = None
         self.name = ""
-        self.edges = []   
+        self.edges = []
 
     def removeEdge(self, edge):
-        edges.remove(edge)
+        self.edges.remove(edge)
 
     def setName(self, name):
         self.name = name
-    
+
     def addEdge(self, to):
         self.edges.append(to)

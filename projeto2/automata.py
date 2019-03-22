@@ -2,12 +2,14 @@ from structures.myQueue import MyQueue
 from structures.myStack import MyStack
 from structures.myNode import MyNode
 
+
 def createAutomata(regex):
     prefix = toPrefix(regex)
     queue = enqueueStringChar(prefix)
     node = automata(queue)
     node.init = True
     return node
+
 
 def toPrefix(str):
     return "A*B|AB"
@@ -25,19 +27,19 @@ def toPrefix(str):
         if(x == '('):
             stack.push(x)
         elif(x == ')'):
-            posfix+=stack.pop()
-            while priority[x] !=  priority[stack.peek()]:
-                posfix+=stack.pop()
+            posfix += stack.pop()
+            while priority[x] != priority[stack.peek()]:
+                posfix += stack.pop()
             stack.pop()
         elif(x == '|'):
-            while stack.peek() != None and priority[x] <=  priority[stack.peek()]:
-                posfix+=stack.pop()
+            while stack.peek() is not None and priority[x] <= priority[stack.peek()]:
+                posfix += stack.pop()
             stack.push(x)
         else:
             posfix += x
 
-    while stack.empty() != True:
-        posfix+=stack.pop()
+    while stack.empty() is not True:
+        posfix += stack.pop()
 
     return posfix
 
@@ -52,7 +54,7 @@ def enqueueStringChar(str):
 def automata(queue):
     value = queue.dequeue()
     if(value == "|"):
-        n = createOr(queue.dequeue(),queue.dequeue())
+        n = createOr(queue.dequeue(), queue.dequeue())
     elif(value == "*"):
         n = createCline(queue.dequeue())
     elif(value == "+"):
@@ -66,7 +68,7 @@ def automata(queue):
     else:
         next = automata(queue)
         n.last.addEdge(next, "#")
-    
+
     return n
 
 
@@ -76,13 +78,14 @@ def createNode(n1):
     empty = MyNode("empty")
     value = MyNode("value")
 
-    init.addEdge(empty,'#')
+    init.addEdge(empty, '#')
     empty.addEdge(value, n1)
     value.addEdge(end, '#')
 
     init.last = end
 
     return init
+
 
 def createPlus(n1):
     init = MyNode("init")
@@ -90,7 +93,7 @@ def createPlus(n1):
     empty = MyNode("empty")
     value = MyNode("value")
 
-    init.addEdge(empty,'#')
+    init.addEdge(empty, '#')
     empty.addEdge(value, n1)
     value.addEdge(empty, '#')
     value.addEdge(end, '#')
@@ -98,6 +101,7 @@ def createPlus(n1):
     init.last = end
 
     return init
+
 
 def createCline(n1):
     init = MyNode("init")
@@ -105,15 +109,16 @@ def createCline(n1):
     empty = MyNode("empty")
     value = MyNode("value")
 
-    init.addEdge(empty,'#')
+    init.addEdge(empty, '#')
     empty.addEdge(end, '#')
     empty.addEdge(value, n1)
     value.addEdge(empty, '#')
     value.addEdge(end, '#')
-    
+
     init.last = end
 
     return init
+
 
 def createOr(n1, n2):
     init = MyNode("init")
@@ -123,12 +128,12 @@ def createOr(n1, n2):
     value = MyNode("value")
     value2 = MyNode("value2")
 
-    init.addEdge(empty,'#')
-    init.addEdge(empty2,'#')
-    empty.addEdge(value,n1)
-    empty2.addEdge(value2,n2)
-    value.addEdge(end,'#')
-    value2.addEdge(end,'#')
+    init.addEdge(empty, '#')
+    init.addEdge(empty2, '#')
+    empty.addEdge(value, n1)
+    empty2.addEdge(value2, n2)
+    value.addEdge(end, '#')
+    value2.addEdge(end, '#')
 
     init.last = end
 
