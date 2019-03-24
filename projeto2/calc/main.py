@@ -2,7 +2,7 @@ from converter import Converter
 
 
 def main():
-    text = "(A.B*(A|B)+)*"
+    text = "(A|B)*(C.D|E*)+"
     converter = Converter()
     print(converter.converterPreFixa(text))
 

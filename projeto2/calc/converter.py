@@ -1,4 +1,5 @@
 from myQueue import MyQueue
+from myStack import MyStack
 
 
 class Converter:
@@ -6,7 +7,7 @@ class Converter:
     # Converte uma expressão infixa em prefixa
     def converterPreFixa(self, expr):
         expression = MyQueue()
-        operator = MyQueue()
+        operator = MyStack(len(expr))
         prefixa = ""
         i=0
         while(i<len(expr)):
@@ -18,18 +19,18 @@ class Converter:
                 prefixa += expr[i]
                 prefixa += aux
             elif (expr[i] == '.' or expr[i] == '|'):
-                if(operator.size() > 0):
-                    prefixa = operator.dequeue() + prefixa
-                    expression.enqueue(prefixa)
-                    prefixa = ""
-                operator.enqueue(expr[i])
+                # if(operator.size() > 0):
+                #     prefixa = operator.dequeue() + prefixa
+                #     expression.enqueue(prefixa)
+                #     prefixa = ""
+                operator.push(expr[i])
             elif (expr[i] == '('):
                 if(i>0 and expr[i-1] != '.' and expr[i-1] != '|'):
-                    if(operator.size() > 0):
-                        prefixa = operator.dequeue() + prefixa
-                        expression.enqueue(prefixa)
-                        prefixa = ""
-                    operator.enqueue('.')
+                    # if(operator.size() > 0):
+                    #     prefixa = operator.dequeue() + prefixa
+                    #     expression.enqueue(prefixa)
+                    #     prefixa = ""
+                    operator.push('.')
                 j = i
                 cont = 1
                 while(cont >= 1):
@@ -43,12 +44,14 @@ class Converter:
                 if(i < len(expr) and (expr[i] == '*' or expr[i] == '+')):
                     aux = expr[i] + aux
                     i =i+1
+                i= i-1
                 prefixa += aux
             i = i+1      
-        while(operator.size() > 0):
-            prefixa = operator.dequeue() + prefixa
-            expression.enqueue(prefixa)
-            prefixa = ""
+        while(not operator.vazia()):
+            prefixa = operator.pop() + prefixa
+            if(operator.vazia()):
+                expression.enqueue(prefixa)
+                prefixa = ""
         while(len(prefixa) > 0):
             expression.enqueue(prefixa)
             prefixa = ""
