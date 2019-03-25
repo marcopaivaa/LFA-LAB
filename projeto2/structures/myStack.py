@@ -1,18 +1,34 @@
 class MyStack:
-    def __init__(self):
-        self.items = []
 
-    def empty(self):
-        return self.items == []
+    def __init__(self, m):
+        self.topo = 0
+        self.maximo = m
+        self.elementos = []
 
-    def push(self, item):
-        self.items.append(item)
+    # Testando se a pilha está cheia
+    def cheia(self):
+        return self.topo == self.maximo
 
+    # Empilhando elementos
+    def push(self, x):
+        if self.cheia():
+            return False
+        self.elementos.append(x)
+        self.topo += 1
+
+    # Verificando se a Pilha está vazia
+    def vazia(self):
+        return self.topo == 0
+
+    # Desempilhando elementos
     def pop(self):
-        return self.items.pop()
+        if self.vazia():
+            return False
+        self.topo -= 1
+        return self.elementos[self.topo]
 
-    def peek(self):
-        return self.items[len(self.items)-1] if len(self.items) > 0 else None
-
-    def size(self):
-        return len(self.items)
+    # Desempilhando elementos
+    def top(self):
+        if self.vazia():
+            return False
+        return self.elementos[self.topo-1]
