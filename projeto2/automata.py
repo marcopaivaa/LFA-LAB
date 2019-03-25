@@ -18,8 +18,10 @@ class Automata:
 
     def createAutomata(self, regex):
         self.nodes = []
+        regex = "(A|B)*.(C.D.E*)+"
         prefix = self.toPrefix(regex)
-        print("Prefixo: "+prefix)
+        print("\nInfixa: " + regex)
+        print("Prefixa: " + prefix)
         queue = self.enqueueStringChar(prefix)
         node = self.automata(queue)
         node.init = True
@@ -27,9 +29,6 @@ class Automata:
         return node
 
     def toPrefix(self, expr):
-        # return ".A*B.|AB"
-        # return ".*|AB+..CD*E"
-        return "*.|AB.CD"
         expression = MyQueue()
         operator = MyStack(len(expr))
         prefixa = ""
