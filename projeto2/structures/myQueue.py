@@ -1,7 +1,7 @@
 class MyQueue:
 
-    def __init__(self):
-        self.queue = []
+    def __init__(self, data = []):
+        self.queue = data
 
     def enqueue(self, data):
         return self.queue.insert(0, data)
@@ -15,6 +15,9 @@ class MyQueue:
 
     def printQueue(self):
         return self.queue
+
+    def peek(self):
+        return self.queue[0] if len(self.queue) > 0 else None
 
     def __str__(self):
         return str(self.queue)[1:-1]

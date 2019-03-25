@@ -26,7 +26,9 @@ class Automata:
         return node
 
     def toPrefix(self, str):
-        return "A*B|AB"
+        # return ".A*B.|AB"
+        # return ".*|AB+..CD*E"
+        return "*.|AB.CD"
 
     def enqueueStringChar(self, str):
         queue = MyQueue()
@@ -35,93 +37,71 @@ class Automata:
         return queue
 
     def automata(self, queue):
-        value = queue.dequeue()
-        if(value == "|"):
-            n = self.createOr(queue.dequeue(), queue.dequeue())
-        elif(value == "*"):
-            n = self.createCline(queue.dequeue())
-        elif(value == "+"):
-            n = self.createPlus(queue.dequeue())
+        v1 = queue.dequeue()
+
+        if((v1 >= 'a' and v1 <= 'z') or (v1 >= 'A' and v1 <= 'Z')):
+            return self.createNode(v1)
         else:
-            n = self.createNode(value)
+            n1 = self.automata(queue)
+
+        if(v1 == "|" or v1 == "."):
+            if(queue.size() == 0):
+                return n1
+            else:
+                n2 = self.automata(queue)
+    
+        if(v1 == "|"):
+            n = self.createOr(n1, n2)
+        elif(v1 == "."):
+            n = self.createAnd(n1, n2)
+        elif(v1 == "*"):
+            n = self.createCline(n1)
+        elif(v1 == "+"):
+            n = self.createPlus(n1)
 
         if(queue.size() == 0):
             n.last.end = True
             self.end = n.last
-            return n
-        else:
-            next = self.automata(queue)
-            n.last.addEdge(next, V_EMPTY)
 
         return n
 
-    def createNode(self, n1):
+    def createNode(self, v):
         init = self.newNode()
         empty = self.newNode()
         value = self.newNode()
         end = self.newNode()
-
         init.addEdge(empty, V_EMPTY)
-        empty.addEdge(value, n1)
+        empty.addEdge(value, v)
         value.addEdge(end, V_EMPTY)
-
         init.last = end
-
-        return init
-
-    def createPlus(self, n1):
-        init = self.newNode()
-        empty = self.newNode()
-        value = self.newNode()
-        empty2 = self.newNode()
-        end = self.newNode()
-
-        init.addEdge(empty, V_EMPTY)
-        empty.addEdge(value, n1)
-        value.addEdge(empty2, V_EMPTY)
-        empty2.addEdge(empty, V_EMPTY)
-        value.addEdge(end, V_EMPTY)
-
-        init.last = end
-
         return init
 
     def createCline(self, n1):
-        init = self.newNode()
-        empty = self.newNode()
-        value = self.newNode()
-        empty2 = self.newNode()
-        end = self.newNode()
+        n1.last.addEdge(n1, V_EMPTY)
+        n1.addEdge(n1.last, V_EMPTY)
+        return n1
 
-        init.addEdge(empty, V_EMPTY)
-        empty.addEdge(end, V_EMPTY)
-        empty.addEdge(value, n1)
-        value.addEdge(empty2, V_EMPTY)
-        empty2.addEdge(empty, V_EMPTY)
-        value.addEdge(end, V_EMPTY)
+    def createPlus(self, n1):
+        n1.last.addEdge(n1, V_EMPTY)
+        return n1
 
-        init.last = end
 
-        return init
+    def createAnd(self, n1, n2):
+        n1.last.addEdge(n2, V_EMPTY)
+        n1.last = n2.last
+        return n1
+
 
     def createOr(self, n1, n2):
         init = self.newNode()
-        empty = self.newNode()
-        value = self.newNode()
-        empty2 = self.newNode()
-        value2 = self.newNode()
         end = self.newNode()
-
-        init.addEdge(empty, V_EMPTY)
-        init.addEdge(empty2, V_EMPTY)
-        empty.addEdge(value, n1)
-        empty2.addEdge(value2, n2)
-        value.addEdge(end, V_EMPTY)
-        value2.addEdge(end, V_EMPTY)
-
+        init.addEdge(n1,V_EMPTY)
+        init.addEdge(n2,V_EMPTY)
+        n1.last.addEdge(end,V_EMPTY)
+        n2.last.addEdge(end,V_EMPTY)
         init.last = end
-
         return init
+
 
     def newNode(self):
         global STATE
