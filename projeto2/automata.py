@@ -19,16 +19,60 @@ class Automata:
     def createAutomata(self, regex):
         self.nodes = []
         prefix = self.toPrefix(regex)
+        print("Prefixo: "+prefix)
         queue = self.enqueueStringChar(prefix)
         node = self.automata(queue)
         node.init = True
         self.init = node
         return node
 
-    def toPrefix(self, str):
+    def toPrefix(self, expr):
         # return ".A*B.|AB"
         # return ".*|AB+..CD*E"
         return "*.|AB.CD"
+        expression = MyQueue()
+        operator = MyStack(len(expr))
+        prefixa = ""
+        i = 0
+        while(i < len(expr)):
+            if (expr[i] >= 'A' and expr[i] <= 'Z'):
+                prefixa += expr[i]
+            elif (expr[i] == '*' or expr[i] == '+'):
+                aux = prefixa[-1]
+                prefixa = prefixa[:-1]
+                prefixa += expr[i]
+                prefixa += aux
+            elif (expr[i] == '.' or expr[i] == '|'):
+                operator.push(expr[i])
+            elif (expr[i] == '('):
+                if(i > 0 and expr[i-1] != '.' and expr[i-1] != '|'):
+                    operator.push('.')
+                j = i
+                cont = 1
+                while(cont >= 1):
+                    j = j+1
+                    if(expr[j] == '('):
+                        cont = cont+1
+                    elif(expr[j] == ')'):
+                        cont = cont-1
+                aux = self.toPrefix(expr[i+1:j])
+                i = j
+                if(i < len(expr) and (expr[i+1] == '*' or expr[i+1] == '+')):
+                    aux = expr[i+1] + aux
+                    i = i+1
+                prefixa += aux
+            i = i+1
+        while(not operator.vazia()):
+            prefixa = operator.pop() + prefixa
+            if(operator.vazia()):
+                expression.enqueue(prefixa)
+                prefixa = ""
+        while(len(prefixa) > 0):
+            expression.enqueue(prefixa)
+            prefixa = ""
+        while (expression.size() > 0):
+            prefixa += expression.dequeue()
+        return prefixa
 
     def enqueueStringChar(self, str):
         queue = MyQueue()
