@@ -18,14 +18,17 @@ class Automata:
 
     def createAutomata(self, regex):
         self.nodes = []
-        regex = "(A|B)*.(C.D.E*)+"
+        regex = "(A|B)*.(C.D.E*)+" if regex == "-t" else regex
         prefix = self.toPrefix(regex)
         print("\nInfixa: " + regex)
         print("Prefixa: " + prefix)
+        self.validateExpression(prefix)
         queue = self.enqueueStringChar(prefix)
         node = self.automata(queue)
         node.init = True
         self.init = node
+        node.last.end = True
+        self.end = node.last
         return node
 
     def toPrefix(self, expr):
@@ -34,7 +37,7 @@ class Automata:
         prefixa = ""
         i = 0
         while(i < len(expr)):
-            if (expr[i] >= 'A' and expr[i] <= 'Z'):
+            if ((expr[i] >= 'A' and expr[i] <= 'Z') or (expr[i] >= 'a' and expr[i] <= 'z')):
                 prefixa += expr[i]
             elif (expr[i] == '*' or expr[i] == '+'):
                 aux = prefixa[-1]
@@ -79,6 +82,17 @@ class Automata:
             queue.enqueue(char)
         return queue
 
+    def validateExpression(self, prefix):
+        alpha = 0
+        op = 0
+        for char in list(prefix):
+            if((char >= 'a' and char <= 'z') or (char >= 'A' and char <= 'Z')):
+                alpha += 1
+            else:
+                op += 1
+        if(op < alpha - 1):
+            raise Exception("Error! Verify the regex expression.")
+
     def automata(self, queue):
         v1 = queue.dequeue()
 
@@ -101,10 +115,6 @@ class Automata:
             n = self.createCline(n1)
         elif(v1 == "+"):
             n = self.createPlus(n1)
-
-        if(queue.size() == 0):
-            n.last.end = True
-            self.end = n.last
 
         return n
 
