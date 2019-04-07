@@ -174,7 +174,7 @@ class Automata:
             for e in self.ends:
                 ends += e.value + " "
         else:
-            ends = self.end.value
+            ends = self.ends.value
         print("Final state: " + str(ends) + "\n")
         for n in self.nodes:
             for e in n.edges:
