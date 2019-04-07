@@ -1,4 +1,4 @@
-from inputs import *
+from p1_inputs import *
 
 
 def main():

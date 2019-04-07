@@ -14,7 +14,8 @@ class Automata:
     def __init__(self):
         self.nodes = []
         self.init = None
-        self.ends = None
+        self.ends = []
+        self.alphabet = []
 
     def createAutomata(self, regex):
         self.nodes = []
@@ -28,7 +29,7 @@ class Automata:
         node.init = True
         self.init = node
         node.last.end = True
-        self.end = node.last
+        self.ends = node.last
         return node
 
     def toPrefix(self, expr):
@@ -38,6 +39,7 @@ class Automata:
         i = 0
         while(i < len(expr)):
             if ((expr[i] >= 'A' and expr[i] <= 'Z') or (expr[i] >= 'a' and expr[i] <= 'z')):
+                self.alphabet.append(expr[i])
                 prefixa += expr[i]
             elif (expr[i] == '*' or expr[i] == '+'):
                 aux = prefixa[-1]
@@ -156,16 +158,24 @@ class Automata:
         return init
 
 
-    def newNode(self):
-        global STATE
-        STATE += 1
-        n = MyNode('Q' + str(STATE))
+    def newNode(self, name = False):
+        if(not name):
+            global STATE
+            STATE += 1
+            name = 'Q' + str(STATE)
+        n = MyNode(name)
         self.nodes.append(n)
         return n
 
     def print(self):
         print("\nInitial state: " + str(self.init.value))
-        print("Final state: " + str(self.end.value) + "\n")
+        ends = ''
+        if isinstance(self.ends,list):
+            for e in self.ends:
+                ends += e.value + " "
+        else:
+            ends = self.end.value
+        print("Final state: " + str(ends) + "\n")
         for n in self.nodes:
             for e in n.edges:
                 print(str(n.value) + " => " +
@@ -199,3 +209,110 @@ class Automata:
         red = mpatches.Patch(color='m', label='Final State')
         plt.legend(handles=[blue, red])
         plt.show()
+
+
+    #BUSCA EM PROFUNDIDADE
+    def dfs(self, node, search = False, closure = []):
+        if not isinstance(closure, MyQueue):
+            raise Exception("Closure must be a queue!")
+        node.visited = True
+        for e in node.edges:
+            if(((search != False and e.value == search) or search == False) and not e.to.visited):
+                closure.enqueue(e.to)
+                self.dfs(e.to, search, closure)
+        return closure
+
+
+    #RESETA OS NÓS VISITADOS
+    def clearVisited(self):
+        for n in self.nodes:
+            n.visited = False
+
+
+    #CRIA O CLOSURE DO AUTOMATO
+    def getClosure(self, init):
+        self.clearVisited()
+        closure = MyQueue()
+        closure.enqueue(init)
+        closure = self.dfs(init, V_EMPTY, closure)
+        self.clearVisited()
+        return closure
+
+    #TRANSFORMA EM DFA
+    def dfa_edge(self, new_automata, init = False, prev_graph = {}, prev_node = None):
+        init = self.init if not init else init
+        
+        #CRIA O CLOSURE
+        closure = self.getClosure(init).toList()
+
+        #CRIA O NOVO NÓ
+        node = new_automata.newNode(init.value)
+
+        #GRAFO PARA NOVOS ESTADOS
+        graph = {}
+
+        #PARA CADA LETRA DO ALFABETO
+        for x in self.alphabet:
+            graph[x] = []
+            #PARA CADA NÓ NO CLOSURE
+            for n in closure:
+                self.clearVisited()
+                #BUSCA TODOS OS ESTADOS A PARTIR DO NÓ N CONSUMINDO A LETRA X
+                temp = self.dfs(n, x, MyQueue())
+                #SE EXISTEM ESTADO, ADICIONA NO GRAFO
+                if(temp.size() > 0):
+                    graph[x] += temp.toList()
+                #SE UM NÓ DO CLOSURE É FINAL, ENTÃO O NOVO NÓ TMB SERÁ
+                if(n.end):
+                    node.end = True
+                    new_automata.ends.append(n)
+                
+        #SE FOR O NÓ INICIAL DO AUTOMATO, ENTÃO O NOVO NÓ TMB SERÁ
+        if(init == self.init):
+            node.init = True
+            new_automata.init = node
+
+        #PARA CADA (ALFABETO CONSUMIDO -> ESTADOS ALCANÇADOS) NO GRAFO GERADO
+        for k, states in graph.items():
+            #PARA CADA ESTADO
+            for v in states:
+                #SE O ESTADO ALCANÇADO FOR O MESMO DE ORIGEM, CRIA UMA EDGE PARA ELE MESMO 
+                #A EDGE É CRIADA NO ESTADO ANTERIOR, CASO EXISTA
+                if(v == init):
+                    prev_node = prev_node if prev_node else node
+                    prev_node.addEdge(prev_node, k)
+                #SE O ESTADO NÃO CONSOME A LETRA DO ALFABETO OU A MESMA NAO FOI CONSUMIDA NO ESTADO ANTERIOR
+                elif(k not in prev_graph.keys() or v not in prev_graph[k]):
+                    #VERIFICA SE O ESTADO JÁ NÃO ESTÁ NO NOVO AUTOMATO
+                    jump = False
+                    for x in new_automata.nodes:
+                        if(x.value == v.value):
+                            node.addEdge(x, k)
+                            jump = True
+                            break
+                    if(jump):
+                        continue
+                    #REPETE O PROCEDIMENTO PARA O PROXIMO ESTADO
+                    to = self.dfa_edge(new_automata, v, graph, node)
+                    #SE EXISTEM SAIDAS DO PRÓXIMO ESTADO, ADICIONA UMA ARESTA PARA ELE
+                    if(len(to.edges) > 0):
+                        node.addEdge(to, k)
+
+        #RETORNA O NÓ
+        return node
+        
+
+    def dfa(self):
+        dfa = Automata()
+        node = self.dfa_edge(dfa)
+        node.init = True
+        remove = []
+        #REMOVE ESTADOS SEM SAÍDAS DO AUTOMATO
+        for n in dfa.nodes:
+            if(len(n.edges) == 0):
+                remove.append(n)
+        for n in remove:
+            dfa.nodes.remove(n)
+        #REMOVE FINAIS DUPLICADOS
+        dfa.ends = list(set(dfa.ends))
+        return dfa
