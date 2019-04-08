@@ -61,7 +61,7 @@ class Automata:
                         cont = cont-1
                 aux = self.toPrefix(expr[i+1:j])
                 i = j
-                if(i < len(expr) and (expr[i+1] == '*' or expr[i+1] == '+')):
+                if(i < len(expr) - 1 and (expr[i+1] == '*' or expr[i+1] == '+')):
                     aux = expr[i+1] + aux
                     i = i+1
                 prefixa += aux
@@ -183,7 +183,7 @@ class Automata:
         print("\n")
 
     def plot(self):
-        g = nx.DiGraph()
+        g = nx.MultiDiGraph()
         edge_labels = dict()
         color_map = []
 
@@ -202,7 +202,7 @@ class Automata:
                 edge_labels[(n.value, e.to.value)] = e.value
 
         pos = nx.shell_layout(g)
-        nx.draw(g, pos, with_labels=True, arrows=True, arrowsize=7,
+        nx.draw(g, pos, with_labels=True, arrows=True, arrowsize=7, splines='curved',
                 node_color=color_map, node_size=400, font_size=10)
         nx.draw_networkx_edge_labels(g, pos, edge_labels=edge_labels)
         blue = mpatches.Patch(color='y', label='Initial State')
@@ -280,7 +280,7 @@ class Automata:
                 #A EDGE É CRIADA NO ESTADO ANTERIOR, CASO EXISTA
                 if(v == init):
                     prev_node = prev_node if prev_node else node
-                    prev_node.addEdge(prev_node, k)
+                    node.addEdge(prev_node, k)
                 #SE O ESTADO NÃO CONSOME A LETRA DO ALFABETO OU A MESMA NAO FOI CONSUMIDA NO ESTADO ANTERIOR
                 elif(k not in prev_graph.keys() or v not in prev_graph[k]):
                     #VERIFICA SE O ESTADO JÁ NÃO ESTÁ NO NOVO AUTOMATO
@@ -294,9 +294,9 @@ class Automata:
                         continue
                     #REPETE O PROCEDIMENTO PARA O PROXIMO ESTADO
                     to = self.dfa_edge(new_automata, v, graph, node)
-                    #SE EXISTEM SAIDAS DO PRÓXIMO ESTADO, ADICIONA UMA ARESTA PARA ELE
-                    if(len(to.edges) > 0):
-                        node.addEdge(to, k)
+                    #SE EXISTEM SAIDAS DO PRÓXIMO ESTADO OU É UM ESTADO FINAL, ADICIONA UMA ARESTA PARA ELE
+                    if(len(to.edges) > 0 or to.end):
+                         node.addEdge(to, k)
 
         #RETORNA O NÓ
         return node
@@ -309,7 +309,7 @@ class Automata:
         remove = []
         #REMOVE ESTADOS SEM SAÍDAS DO AUTOMATO
         for n in dfa.nodes:
-            if(len(n.edges) == 0):
+            if(len(n.edges) == 0 and not n.end):
                 remove.append(n)
         for n in remove:
             dfa.nodes.remove(n)
